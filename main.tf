@@ -27,13 +27,7 @@ resource "aws_security_group" "allow_SSH" {
     protocol         = "-1"
     cidr_blocks      = ["0.0.0.0/0"]
     ipv6_cidr_blocks = ["::/0"]
-    # description      = "SSH from VPC"
-    # from_port        = 22
-    # to_port          = 22
-    # protocol         = "tcp"
-    # cidr_blocks      = ["61.6.14.46/32"]
-    # # ipv6_cidr_blocks = [aws_vpc.main.ipv6_cidr_block]
-  }
+    }
 
   egress {
     from_port        = 0
@@ -58,10 +52,28 @@ resource "aws_instance" "ubuntu" {
   key_name               = aws_key_pair.deployer1.key_name
   vpc_security_group_ids = ["${aws_security_group.allow_SSH.id}"]
   tags = {
-    "Name" = "UBUNTU-Node"
+    "Name" = "UBUNTU-DCA"
     "ENV"  = "Dev"
   }
-  user_data = "${file("docker-installation.sh")}"
+# Type of connection to be established
+  connection {
+    type        = "ssh"
+    user        = "ubuntu"
+    private_key = file("./deployer")
+    host        = self.public_ip
+  }
+
+  provisioner "file" {
+    source      = "docker-installation.sh"
+    destination = "/tmp/docker-installation.sh"
+  }
+  # Remotely execute commands to install Java, Python, Jenkins
+  provisioner "remote-exec" {
+    inline = [
+        "chmod +x /tmp/docker-installation.sh",
+        "/tmp/docker-installation.sh args",
+    ]
+  }
 
   depends_on = [aws_key_pair.deployer1]
 

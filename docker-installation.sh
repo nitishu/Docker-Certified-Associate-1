@@ -8,7 +8,11 @@ echo " Set up the repository"
 # Update the apt package index and install packages to allow apt to use a repository over HTTPS:
 sleep 1
 sudo apt-get update -y
-sudo apt-get install ca-certificates curl gnupg lsb-release -y
+sudo apt-get install ca-certificates curl gnupg lsb-release git -y
+
+echo "Add Docker’s official GPG key:"
+
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
 
 echo "Use the following command to set up the stable repository. To add the nightly or test repository, add the word nightly or test (or both) after the word stable in the commands below."
 
